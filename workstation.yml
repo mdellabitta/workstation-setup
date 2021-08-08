@@ -1,0 +1,103 @@
+---
+- hosts: localhost
+  become: yes
+
+  tasks:
+    
+#    - name: Set hostname
+#      script:
+
+    - name: Add docker apt key
+      ansible.builtin.shell:
+        cmd: "curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/docker-ce-archive-keyring.gpg > /dev/null"
+        creates: /usr/share/keyrings/docker-ce-archive-keyring.gpg
+
+    - name: Add docker repository
+      ansible.builtin.apt_repository:
+        update_cache: no
+        filename: docker-ce
+        repo: "deb [signed-by=/usr/share/keyrings/docker-ce-archive-keyring.gpg] https://download.docker.com/linux/debian buster stable"
+
+    - name: Update apt-get repo and cache
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+        cache_valid_time: 3600
+
+    - name: Upgrade all apt packages
+      apt:
+        upgrade: dist
+        force_apt_get: yes
+        
+    - name: Install packages
+      apt:
+        pkg:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - apt-transport-https
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - emacs-nox
+          - zsh
+          - tilix
+        state: latest
+          
+    - name: Install docker-compose
+      pip:
+        name: docker-compose
+        state: latest
+
+    - name: Add user to docker group
+      user:
+        name: michael
+        groups: docker
+        append: yes
+
+    - name: Change user shell to zsh 
+      become: yes
+      user:
+        name: "michael"
+        shell: /bin/zsh
+
+    - name: Download oh-my-zsh
+      command: "curl -o /tmp/oh-my-zsh.sh -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+
+    - name: Install oh-my-zsh
+      command: "sh /tmp/oh-my-zsh.sh --unattended --keep-zshrc"
+      become: yes
+      become_user: michael
+      args:
+        creates: /home/michael/.oh-my-zsh
+
+    - name: Load pyenv in .zshrc
+      lineinfile:
+        path: /home/michael/.zshrc
+        regexp: 'pyenv init'
+        line: export PYENV_ROOT="$HOME/.pyenv"; export PATH="$PYENV_ROOT/bin:$PATH"; eval "$(pyenv init --path)"
+
+    - name: Download Powerlevel10k
+      command: "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /home/michael/.oh-my-zsh/custom/themes/powerlevel10k"
+      become: yes
+      become_user: michael
+      args:
+        creates: /home/michael/.oh-my-zsh/custom/themes/powerlevel10k
+
+    - name: Install Powerlevel10k theme
+      ansible.builtin.lineinfile:
+        path: /home/michael/.zshrc
+        regexp: '^ZSH_THEME='
+        line: ZSH_THEME="powerlevel10k/powerlevel10k"
+
+    # sdkman
+    # spark
+
+    # slack
+    # zoom
+    # firefox stable
+    # intellij
+    
+
+  handlers:
