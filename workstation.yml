@@ -140,12 +140,24 @@
         line: export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
         insertafter: EOF
         regexp: "nvm.sh"
-        
-    # spark
 
+    - name: Check if zoom is installed
+      command: dpkg-query -W zoom
+      register: zoom_check_deb
+      failed_when: zoom_check_deb.rc > 1
+      changed_when: zoom_check_deb.rc == 1
+
+    - name: Download zoom
+      command: "curl -L -o /tmp/zoom_amd64.deb https://zoom.us/client/latest/zoom_amd64.deb"
+      when: zoom_check_deb.rc == 1
+
+    - name: Install zoom
+      apt:
+         deb: "/tmp/zoom_amd64.deb"
+      become: true
+      when: zoom_check_deb.rc == 1
+      
     # slack
-    # zoom
-    # firefox stable
     # intellij
     
 
