@@ -47,14 +47,18 @@
 
     - name: Set git default branch
       command: git config --global init.defaultBranch main
+      become: yes
       become_user: michael
 
     - name: Set git name
       command: git config --global user.name "Michael Della Bitta"
+      become: yes
       become_user: michael
 
     - name: Set git email
       command: git config --global user.email "mdellabitta@gmail.com"
+      become: yes
+      become_user: michael
           
     - name: Install docker-compose
       pip:
