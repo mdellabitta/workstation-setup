@@ -43,6 +43,7 @@
           - emacs-nox
           - zsh
           - tilix
+          - zstd
         state: latest
 
     - name: Set git default branch
@@ -157,7 +158,6 @@
       become: true
       when: zoom_check_deb.rc == 1
       
-    # slack
     # intellij
     
 
