@@ -159,6 +159,11 @@
       when: zoom_check_deb.rc == 1
       
     # intellij
+    # virtualbox
+    # firefox
+    # slack
+    # vagrant
+    
     
 
   handlers:
