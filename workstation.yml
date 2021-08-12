@@ -44,6 +44,10 @@
           - zsh
           - tilix
           - zstd
+          - flatpak
+          - network-manager-openvpn
+          - network-manager-openvpn-gnome
+          - openvpn
         state: latest
 
     - name: Set git default branch
@@ -61,9 +65,11 @@
       become: yes
       become_user: michael
           
-    - name: Install docker-compose
+    - name: Install pip packages
       pip:
-        name: docker-compose
+        name:
+          - docker-compose
+          - s3cmd
         state: latest
 
     - name: Add user to docker group
@@ -157,6 +163,24 @@
          deb: "/tmp/zoom_amd64.deb"
       become: true
       when: zoom_check_deb.rc == 1
+
+    - name: Check to see if aws command exists
+      stat:
+        path: /home/michael/.pyenv/shims/aws
+      register: aws
+      
+    - name: Download aws cli
+      command: 'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"'
+      when: aws.stat.exists == False
+
+    - name: Unzip aws cli
+      command: unzip -u /tmp/awscliv2.zip -d /tmp
+      when: aws.stat.exists == False
+
+    - name: Install aws cli
+      command: /tmp/aws/install
+      become: yes
+      when: aws.stat.exists == False
       
     # intellij
     # virtualbox
