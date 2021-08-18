@@ -1,3 +1,5 @@
+#### THIS PLAYBOOK ASSUMES THE SYSTEM WAS BOOTSTRAPPED WITH THE SCRIPT
+
 ---
 - hosts: localhost
   become: yes
@@ -7,26 +9,31 @@
 #    - name: Set hostname
 #      script:
 
-    - name: Add docker apt key
+
+    - name: Add signal key
       ansible.builtin.shell:
-        cmd: "curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/docker-ce-archive-keyring.gpg > /dev/null"
-        creates: /usr/share/keyrings/docker-ce-archive-keyring.gpg
+        cmd: "curl -fsSL https://updates.signal.org/desktop/apt/keys.asc | gpg --dearmor | sudo tee /usr/share/keyrings/signal-desktop-keyring.gpg > /dev/null"
+        creates: /usr/share/keyrings/signal-desktop-keyring.gpg
 
-    - name: Add docker repository
+    - name: Add signal repo
       ansible.builtin.apt_repository:
-        update_cache: no
-        filename: docker-ce
-        repo: "deb [signed-by=/usr/share/keyrings/docker-ce-archive-keyring.gpg] https://download.docker.com/linux/debian buster stable"
+        filename: signal 
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/signal-desktop-keyring.gpg] https://updates.signal.org/desktop/apt xenial main"
 
-    - name: Update apt-get repo and cache
-      apt:
-        update_cache: yes
-        force_apt_get: yes
-        cache_valid_time: 3600
+    - name: Add tailscale key
+      ansible.builtin.shell:
+        cmd: "curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/tailscale-keyring.gpg > /dev/null"
+        creates: /usr/share/keyrings/tailscale-keyring.gpg
+
+    - name: Add tailscale repo
+      ansible.builtin.apt_repository:
+        filename: tailscale
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/tailscale-keyring.gpg] https://pkgs.tailscale.com/stable/debian bullseye main"
 
     - name: Upgrade all apt packages
       apt:
         upgrade: dist
+        update_cache: yes
         force_apt_get: yes
         
     - name: Install packages
@@ -45,11 +52,19 @@
           - tilix
           - zstd
           - flatpak
-          - network-manager-openvpn
-          - network-manager-openvpn-gnome
-          - openvpn
+          #- network-manager-openvpn
+          #- network-manager-openvpn-gnome
+          #- openvpn
+          - tailscale
+          - traceroute
         state: latest
 
+
+    - name: Set git pull strategy
+      command: git config pull.rebase true
+      become: yes
+      become_user: michael
+      
     - name: Set git default branch
       command: git config --global init.defaultBranch main
       become: yes
@@ -182,6 +197,8 @@
       become: yes
       when: aws.stat.exists == False
       
+
+
     # intellij
     # virtualbox
     # firefox
