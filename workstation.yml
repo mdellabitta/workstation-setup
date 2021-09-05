@@ -5,10 +5,16 @@
   become: yes
 
   tasks:
-    
-#    - name: Set hostname
-#      script:
 
+    - name: Add virtualbox key
+      ansible.builtin.shell:
+        cmd: "curl -fsSL https://www.virtualbox.org/download/oracle_vbox_2016.asc | gpg --dearmor | sudo tee /usr/share/keyrings/virtualbox-keyring.gpg > /dev/null"
+        creates: /usr/share/keyrings/virtualbox-keyring.gpg
+
+    - name: Add virtualbox repo
+      ansible.builtin.apt_repository:
+        filename: virtualbox
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/virtualbox-keyring.gpg] https://download.virtualbox.org/virtualbox/debian bullseye contrib"
 
     - name: Add signal key
       ansible.builtin.shell:
@@ -52,11 +58,10 @@
           - tilix
           - zstd
           - flatpak
-          #- network-manager-openvpn
-          #- network-manager-openvpn-gnome
-          #- openvpn
           - tailscale
           - traceroute
+          - virtualbox
+          - net-tools
         state: latest
 
 
@@ -197,14 +202,9 @@
       become: yes
       when: aws.stat.exists == False
       
-
-
     # intellij
-    # virtualbox
     # firefox
     # slack
     # vagrant
-    
-    
 
   handlers:
