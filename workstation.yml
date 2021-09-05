@@ -64,6 +64,7 @@
           - docker-ce-cli
           - containerd.io
           - emacs-nox
+          - elpa-yaml-mode
           - zsh
           - tilix
           - zstd
@@ -73,6 +74,7 @@
           - virtualbox
           - net-tools
           - vagrant
+          - rsync
         state: latest
 
 
