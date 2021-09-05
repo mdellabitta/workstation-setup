@@ -16,6 +16,16 @@
         filename: virtualbox
         repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/virtualbox-keyring.gpg] https://download.virtualbox.org/virtualbox/debian bullseye contrib"
 
+    - name: Add vagrant key
+      ansible.builtin.shell:
+        cmd: "curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/vagrant-keyring.gpg > /dev/null"
+        creates: /usr/share/keyrings/vagrant-keyring.gpg
+
+    - name: Add vagrant repo
+      ansible.builtin.apt_repository:
+        filename: vagrant
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/vagrant-keyring.gpg] https://apt.releases.hashicorp.com bullseye main"
+
     - name: Add signal key
       ansible.builtin.shell:
         cmd: "curl -fsSL https://updates.signal.org/desktop/apt/keys.asc | gpg --dearmor | sudo tee /usr/share/keyrings/signal-desktop-keyring.gpg > /dev/null"
@@ -62,6 +72,7 @@
           - traceroute
           - virtualbox
           - net-tools
+          - vagrant
         state: latest
 
 
@@ -183,24 +194,16 @@
          deb: "/tmp/zoom_amd64.deb"
       become: true
       when: zoom_check_deb.rc == 1
-
-    - name: Check to see if aws command exists
-      stat:
-        path: /home/michael/.pyenv/shims/aws
-      register: aws
       
     - name: Download aws cli
       command: 'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"'
-      when: aws.stat.exists == False
 
     - name: Unzip aws cli
       command: unzip -u /tmp/awscliv2.zip -d /tmp
-      when: aws.stat.exists == False
 
     - name: Install aws cli
-      command: /tmp/aws/install
+      command: /tmp/aws/install --update
       become: yes
-      when: aws.stat.exists == False
       
     # intellij
     # firefox
