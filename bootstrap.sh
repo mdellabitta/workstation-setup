@@ -60,5 +60,11 @@ echo '---> Installing python 3.9.5 and setting it as default'
 pyenv install -s 3.9.5
 pyenv global 3.9.5
 
+echo '---> Upgrading pip'
+pip install --upgrade pip
+
+echo '---> Installing Python wheel and setuptools'
+pip install --upgrade wheel setuptools
+
 echo '---> Installing ansible and requirements'
 pip install ansible
