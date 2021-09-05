@@ -2,5 +2,4 @@
 localhost ansible_connection=local 
 
 [workstation:vars]
-hostname=songbird
 ansible_python_interpreter=/home/michael/.pyenv/shims/python 
