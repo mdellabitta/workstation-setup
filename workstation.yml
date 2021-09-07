@@ -75,6 +75,7 @@
           - net-tools
           - vagrant
           - rsync
+          - ncdu
         state: latest
 
 
