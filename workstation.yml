@@ -6,9 +6,42 @@
 
   tasks:
 
+    - name: Add 1password key
+      ansible.builtin.shell:
+        cmd: "curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor | sudo tee /usr/share/keyrings/1password-archive-keyring.gpg"
+      args:
+        creates: /usr/share/keyrings/1password-archive-keyring.gpg
+
+    - name: Add 1password repo
+      ansible.builtin.apt_repository:
+        filename: 1password
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main"
+
+    - name: Make 1password debsig dirs
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      with_items:
+        - '/etc/debsig/policies/AC2D62742012EA22/'
+        - '/usr/share/debsig/keyrings/AC2D62742012EA22'
+
+    - name: Add 1password debsig policy
+      ansible.builtin.shell:
+        cmd: "curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol | sudo tee /etc/debsig/policies/AC2D62742012EA22/1password.pol"
+      args:
+        creates: /etc/debsig/policies/AC2D62742012EA22/1password.pol
+
+    - name: Add 1password debsig signature
+      ansible.builtin.shell:
+        cmd: "curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor | sudo tee /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg"
+      args:
+        creates: /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
+
     - name: Add virtualbox key
       ansible.builtin.shell:
         cmd: "curl -fsSL https://www.virtualbox.org/download/oracle_vbox_2016.asc | gpg --dearmor | sudo tee /usr/share/keyrings/virtualbox-keyring.gpg > /dev/null"
+      args:
         creates: /usr/share/keyrings/virtualbox-keyring.gpg
 
     - name: Add virtualbox repo
@@ -19,6 +52,7 @@
     - name: Add vagrant key
       ansible.builtin.shell:
         cmd: "curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/vagrant-keyring.gpg > /dev/null"
+      args:
         creates: /usr/share/keyrings/vagrant-keyring.gpg
 
     - name: Add vagrant repo
@@ -29,6 +63,7 @@
     - name: Add signal key
       ansible.builtin.shell:
         cmd: "curl -fsSL https://updates.signal.org/desktop/apt/keys.asc | gpg --dearmor | sudo tee /usr/share/keyrings/signal-desktop-keyring.gpg > /dev/null"
+      args:
         creates: /usr/share/keyrings/signal-desktop-keyring.gpg
 
     - name: Add signal repo
@@ -39,6 +74,7 @@
     - name: Add tailscale key
       ansible.builtin.shell:
         cmd: "curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/tailscale-keyring.gpg > /dev/null"
+      args:
         creates: /usr/share/keyrings/tailscale-keyring.gpg
 
     - name: Add tailscale repo
@@ -76,6 +112,7 @@
           - vagrant
           - rsync
           - ncdu
+          - 1password
         state: latest
 
 
@@ -119,7 +156,7 @@
         shell: /bin/zsh
 
     - name: Download oh-my-zsh
-      command: "curl -o /tmp/oh-my-zsh.sh -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+      command: "curl -o /tmp/oh-my-zsh.sh -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"      
 
     - name: Install oh-my-zsh
       command: "sh /tmp/oh-my-zsh.sh --unattended --keep-zshrc"
