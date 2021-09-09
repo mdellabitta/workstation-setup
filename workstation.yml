@@ -113,6 +113,7 @@
           - rsync
           - ncdu
           - 1password
+          - ripgrep
         state: latest
 
 
