@@ -114,6 +114,7 @@
           - ncdu
           - 1password
           - ripgrep
+          - jq
         state: latest
 
 
