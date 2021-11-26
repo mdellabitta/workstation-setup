@@ -6,6 +6,24 @@
 
   tasks:
 
+
+# echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
+# curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
+# sudo apt update
+# sudo apt install -y ungoogled-chromium
+
+
+    - name: Add Ungoogled Chromium key
+      ansible.builtin.shell:
+        cmd: "curl -sS https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key | sudo gpg --dearmor | sudo tee /usr/share/keyrings/ungoogled-chromium-keyring.gpg"
+      args:
+        creates: /usr/share/keyrings/ungoogled-chromium-keyring.gpg
+
+    - name: Add Ungoogled Chromium repo
+      ansible.builtin.apt_repository:
+        filename: ungoogled-chromium
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/ungoogled-chromium-keyring.gpg] http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /"
+
     - name: Add 1password key
       ansible.builtin.shell:
         cmd: "curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor | sudo tee /usr/share/keyrings/1password-archive-keyring.gpg"
@@ -91,6 +109,7 @@
     - name: Install packages
       apt:
         pkg:
+          - ungoogled-chromium
           - ca-certificates
           - curl
           - gnupg
@@ -116,7 +135,6 @@
           - ripgrep
           - jq
         state: latest
-
 
     - name: Set git pull strategy
       command: git config --global pull.rebase true
@@ -157,8 +175,14 @@
         name: "michael"
         shell: /bin/zsh
 
+    - name: Check if oh-my-zsh is installed
+      stat: 
+        path: /home/michael/.oh-my-zsh
+      register: oh_my_zsh_installed
+
     - name: Download oh-my-zsh
-      command: "curl -o /tmp/oh-my-zsh.sh -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"      
+      command: "curl -o /tmp/oh-my-zsh.sh -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+      when: oh_my_zsh_installed.stat.exists == False
 
     - name: Install oh-my-zsh
       command: "sh /tmp/oh-my-zsh.sh --unattended --keep-zshrc"
@@ -187,8 +211,14 @@
         regexp: '^ZSH_THEME='
         line: ZSH_THEME="powerlevel10k/powerlevel10k"
 
+    - name: Check if SDKMAN is installed
+      stat: 
+        path: /home/michael/.sdkman
+      register: sdkman_installed
+
     - name: Download SDKMAN
       command: "curl -o /tmp/sdkman.sh -s 'https://get.sdkman.io?rcupdate=false'"
+      when: sdkman_installed.stat.exists == False
 
     - name: Install SDKMAN
       command: "sh /tmp/sdkman.sh"
@@ -196,6 +226,7 @@
       become_user: michael
       args:
         creates: /home/michael/.sdkman
+      when: sdkman_installed.stat.exists == False
 
     - name: Add SDKMAN to .zshrc
       lineinfile:
@@ -203,9 +234,16 @@
         line: export SDKMAN_DIR="$HOME/.sdkman"; [[ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" ]] && source "${SDKMAN_DIR}/bin/sdkman-init.sh"
         insertafter: EOF
         regexp: "sdkman-init"
+      when: sdkman_installed.stat.exists == False
+
+    - name: Check if nvm is installed
+      stat: 
+        path: /home/michael/.nvm
+      register: nvm_installed
 
     - name: Download nvm
       command: curl -o /tmp/nvm.sh -s 'https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh'
+      when: nvm_installed.stat.exists == False
 
     - name: Run nvm install script
       command: "sh /tmp/nvm.sh"
@@ -213,6 +251,7 @@
       become_user: michael
       args:
         creates: /home/michael/.nvm
+      when: nvm_installed.stat.exists == False
 
     - name: Add nvm to .zshrc
       lineinfile:
@@ -220,6 +259,7 @@
         line: export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
         insertafter: EOF
         regexp: "nvm.sh"
+      when: nvm_installed.stat.exists == False
 
     - name: Check if zoom is installed
       command: dpkg-query -W zoom
@@ -237,19 +277,26 @@
       become: true
       when: zoom_check_deb.rc == 1
       
+    - name: Check if aws-cli is installed
+      stat: 
+        path: /usr/local/bin/aws
+      register: aws_cli_installed
+    
     - name: Download aws cli
       command: 'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"'
+      when: aws_cli_installed.stat.exists == False
 
     - name: Unzip aws cli
       command: unzip -u /tmp/awscliv2.zip -d /tmp
+      when: aws_cli_installed.stat.exists == False
 
     - name: Install aws cli
       command: /tmp/aws/install --update
       become: yes
+      when: aws_cli_installed.stat.exists == False
       
     # intellij
     # firefox
     # slack
-    # vagrant
 
   handlers:
