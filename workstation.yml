@@ -152,7 +152,7 @@
       become_user: michael
 
     - name: Set git email
-      command: git config --global user.email "mdellabitta@gmail.com"
+      command: git config --global user.email "mdellabitta@tutanota.com"
       become: yes
       become_user: michael
           
