@@ -1,0 +1,139 @@
+---
+- hosts: localhost
+#  become: yes
+  tasks:
+
+    - name: Install casks
+      community.general.homebrew_cask:
+        pkg:
+          - 1password
+          - bitwarden
+          - datagrip
+          - firefox
+          - gimp
+          - intellij-idea
+          - ipfs
+          - iterm2
+          - malwarebytes
+          - omnidisksweeper
+          - signal
+          - slack
+          - todoist
+          - virtualbox
+          - visual-studio-code
+          - vivaldi
+          - ytmdesktop-youtube-music
+          - zoom
+          - docker
+          - vagrant
+        state: latest
+      
+    - name: Install packages
+      community.general.homebrew:
+        pkg:
+          - git
+          - pyenv
+          - tailscale
+          - curl
+          - gnupg 
+          - pinentry-mac
+          - emacs
+          - awscli
+          - zstd
+          - ripgrep
+          - jq
+          - ncdu
+          - ansible
+          - nvm
+        state: latest
+
+    - name: Set git pull strategy
+      command: git config --global pull.rebase true
+      become: yes
+      become_user: michael
+      
+    - name: Set git default branch
+      command: git config --global init.defaultBranch main
+      become: yes
+      become_user: michael
+
+    - name: Set git name
+      command: git config --global user.name "Michael Della Bitta"
+      become: yes
+      become_user: michael
+
+    - name: Set git email
+      command: git config --global user.email "mdellabitta@tutanota.com"
+      become: yes
+      become_user: michael
+          
+    - name: Install pip packages
+      pip:
+        name:
+          - docker-compose
+          - s3cmd
+        state: latest
+
+    - name: Check if oh-my-zsh is installed
+      stat: 
+        path: /Users/michael/.oh-my-zsh
+      register: oh_my_zsh_installed
+
+    - name: Download oh-my-zsh
+      command: "curl -o /tmp/oh-my-zsh.sh -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+      when: oh_my_zsh_installed.stat.exists == False
+
+    - name: Install oh-my-zsh
+      command: "sh /tmp/oh-my-zsh.sh --unattended --keep-zshrc"
+      become: yes
+      become_user: michael
+      args:
+        creates: /Users/michael/.oh-my-zsh
+
+    - name: Download Powerlevel10k
+      command: "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /Users/michael/.oh-my-zsh/custom/themes/powerlevel10k"
+      become: yes
+      become_user: michael
+      args:
+        creates: /Users/michael/.oh-my-zsh/custom/themes/powerlevel10k
+
+    - name: Install Powerlevel10k theme
+      ansible.builtin.lineinfile:
+        path: /Users/michael/.zshrc
+        regexp: '^ZSH_THEME='
+        line: ZSH_THEME="powerlevel10k/powerlevel10k"
+
+    - name: Check if SDKMAN is installed
+      stat: 
+        path: /Users/michael/.sdkman
+      register: sdkman_installed
+
+    - name: Download SDKMAN
+      command: "curl -o /tmp/sdkman.sh -s 'https://get.sdkman.io?rcupdate=false'"
+      when: sdkman_installed.stat.exists == False
+
+    - name: Install SDKMAN
+      command: "sh /tmp/sdkman.sh"
+      become: yes
+      become_user: michael
+      args:
+        creates: /Users/michael/.sdkman
+      when: sdkman_installed.stat.exists == False
+
+    - name: Add SDKMAN to .zshrc
+      lineinfile:
+        path: /Users/michael/.zshrc
+        line: export SDKMAN_DIR="$HOME/.sdkman"; [[ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" ]] && source "${SDKMAN_DIR}/bin/sdkman-init.sh"
+        insertafter: EOF
+        regexp: "sdkman-init"
+      when: sdkman_installed.stat.exists == False
+
+    # - name: Add nvm to .zshrc
+    #   lineinfile:
+    #     path: /home/michael/.zshrc
+    #     line: export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+    #     insertafter: EOF
+    #     regexp: "nvm.sh"
+    #   when: nvm_installed.stat.exists == False
+      
+  handlers:
