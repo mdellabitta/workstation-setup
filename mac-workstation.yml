@@ -1,6 +1,5 @@
 ---
 - hosts: localhost
-#  become: yes
   tasks:
 
     - name: Install casks
@@ -44,7 +43,6 @@
           - jq
           - ncdu
           - ansible
-          - nvm
         state: latest
 
     - name: Set git pull strategy
@@ -90,6 +88,15 @@
       args:
         creates: /Users/michael/.oh-my-zsh
 
+    - name: Edit .zshrc
+      ansible.builtin.blockinfile:
+        path: /Users/michael/.zshrc
+        create: true
+        block: |
+          export ZSH="/Users/michael/.oh-my-zsh"
+          plugins=(git)
+          source $ZSH/oh-my-zsh.sh
+
     - name: Download Powerlevel10k
       command: "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /Users/michael/.oh-my-zsh/custom/themes/powerlevel10k"
       become: yes
@@ -128,12 +135,29 @@
         regexp: "sdkman-init"
       when: sdkman_installed.stat.exists == False
 
-    # - name: Add nvm to .zshrc
-    #   lineinfile:
-    #     path: /home/michael/.zshrc
-    #     line: export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-    #     insertafter: EOF
-    #     regexp: "nvm.sh"
-    #   when: nvm_installed.stat.exists == False
+    - name: Check if nvm is installed
+      stat: 
+        path: /home/michael/.nvm
+      register: nvm_installed
+
+    - name: Download nvm
+      command: curl -o /tmp/nvm.sh -s 'https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh'
+      when: nvm_installed.stat.exists == False
+
+    - name: Run nvm install script
+      command: "sh /tmp/nvm.sh"
+      become: yes
+      become_user: michael
+      args:
+        creates: /home/michael/.nvm
+      when: nvm_installed.stat.exists == False
+
+    - name: Add nvm to .zshrc
+      lineinfile:
+        path: /home/michael/.zshrc
+        line: export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+        insertafter: EOF
+        regexp: "nvm.sh"
+      when: nvm_installed.stat.exists 
       
   handlers:
