@@ -2,6 +2,10 @@
 - hosts: localhost
   tasks:
 
+    - name: Tap fonts cask
+      community.general.homebrew_tap:
+        name: homebrew/cask-fonts
+
     - name: Install casks
       community.general.homebrew_cask:
         pkg:
@@ -25,6 +29,7 @@
           - zoom
           - docker
           - vagrant
+          - font-fira-code-nerd-font
         state: latest
       
     - name: Install packages
