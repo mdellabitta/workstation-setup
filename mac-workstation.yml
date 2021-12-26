@@ -30,6 +30,7 @@
           - docker
           - vagrant
           - font-fira-code-nerd-font
+          - sizeup
         state: latest
       
     - name: Install packages
