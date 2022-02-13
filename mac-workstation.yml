@@ -49,7 +49,18 @@
           - jq
           - ncdu
           - ansible
+	  - tmux
         state: latest
+
+    - name: Enforce git commit signing
+      command: git config --global commit.gpgsign true
+      become: yes
+      become_user: michael
+
+    - name: Set pinentry program
+      command: git config --global gpg.program gpg
+      become: yes
+      become_user: michael
 
     - name: Set git pull strategy
       command: git config --global pull.rebase true
@@ -94,13 +105,34 @@
       args:
         creates: /Users/michael/.oh-my-zsh
 
-    - name: Edit .zshrc
+    - name: Install zsh-autosuggestions
+      command: git clone https://github.com/zsh-users/zsh-autosuggestions /Users/michael/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+      become: yes
+      become_user: michael
+      args:
+        creates: /Users/michael/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+
+    - name: Install zsh-syntax-highlighting
+      command: git clone https://github.com/zsh-users/zsh-syntax-highlighting /Users/michael/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+      become: yes
+      become_user: michael
+      args:
+        creates: /Users/michael/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+
+    - name: Edit omz into .zshrc
       ansible.builtin.blockinfile:
         path: /Users/michael/.zshrc
         create: true
         block: |
           export ZSH="/Users/michael/.oh-my-zsh"
-          plugins=(git)
+          plugins=(
+            git
+            node
+            npm
+            nvm
+            zsh-autosuggestions
+            zsh-syntax-highlighting
+          )
           source $ZSH/oh-my-zsh.sh
 
     - name: Download Powerlevel10k
@@ -143,7 +175,7 @@
 
     - name: Check if nvm is installed
       stat: 
-        path: /home/michael/.nvm
+        path: /Users/michael/.nvm
       register: nvm_installed
 
     - name: Download nvm
@@ -155,15 +187,28 @@
       become: yes
       become_user: michael
       args:
-        creates: /home/michael/.nvm
+        creates: /Users/michael/.nvm
       when: nvm_installed.stat.exists == False
 
     - name: Add nvm to .zshrc
       lineinfile:
-        path: /home/michael/.zshrc
+        path: /Users/michael/.zshrc
         line: export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
         insertafter: EOF
         regexp: "nvm.sh"
       when: nvm_installed.stat.exists 
       
+    - name: Add pyenv to .zshrc
+      ansible.builtin.lineinfile:
+        path: /Users/michael/.zshrc
+        line: eval "$(pyenv init -)"
+        insertafter: EOF
+        regexp: "pyenv init"
+
+    - name: Add pyenv to .zprofile
+      ansible.builtin.lineinfile:
+        create: true
+        path: /Users/michael/.zprofile
+        line: eval "$(pyenv init --path)"
+
   handlers:
