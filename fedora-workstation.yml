@@ -1,0 +1,270 @@
+#### THIS PLAYBOOK ASSUMES THE SYSTEM WAS BOOTSTRAPPED WITH THE SCRIPT
+
+---
+- hosts: localhost
+  become: yes
+
+  tasks:
+
+    - name: Increase number of dnf downloads
+      community.general.ini_file:
+        path:  /etc/dnf/dnf.conf
+        section: main
+        option: max_parallel_downloads
+        value: 10
+
+    - name: Add RPM Fusion free key
+      rpm_key:
+        key: https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-fedora-2020
+        fingerprint: E9A4 91A3 DE24 7814 E7E0 67EA E06F 8ECD D651 FF2E
+    
+    - name: Add RPM Fusion nonfree key
+      rpm_key:
+        key: https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-nonfree-fedora-2020
+        fingerprint: 79BD B88F 9BBF 7391 0FD4 095B 6A2A F961 9484 3C65
+
+    - name: Enable RPM Fusion
+      dnf:
+        name: 
+          - "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
+          - "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
+  
+    - name: Add vscodium repo
+      yum_repository:
+        name: vscodium
+        description: VSCodium repository
+        baseurl: https://download.vscodium.com/rpms/
+        enabled: yes
+        gpgcheck: yes
+        repo_gpgcheck: yes
+        gpgkey: https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg
+        metadata_expire: 3600
+        
+    - name: Add Docker repo
+      get_url:
+        url: https://download.docker.com/linux/fedora/docker-ce.repo
+        dest: '/etc/yum.repos.d/docker-ce.repo'
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Add tailscale repo
+      get_url:
+        url: https://pkgs.tailscale.com/stable/fedora/tailscale.repo
+        dest: '/etc/yum.repos.d/tailscale.repo'
+        owner: root
+        group: root
+        mode: 0644
+    
+    - name: Install packages
+      dnf:
+        name:
+          - codium
+          - ca-certificates
+          - curl
+          - gnupg
+          - redhat-lsb-core
+          - docker-compose-plugin
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - emacs-nox
+          - emacs-yaml-mode
+          - zsh
+          - tilix
+          - zstd
+          - tailscale
+          - traceroute
+          - net-tools
+          - rsync
+          - ncdu
+          - ripgrep
+          - jq
+          - tlp
+          - tlp-rdw
+          - gnome-tweak-tool
+          - chrome-gnome-shell
+        state: latest
+
+    - name: Add flathub
+      community.general.flatpak_remote:
+        name: flathub
+        state: present
+        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+        method: user
+
+    - name: Install flathub flatpaks
+      community.general.flatpak:
+        name: 
+          - io.gitlab.librewolf-community
+          - com.slack.Slack
+          - com.todoist.Todoist
+          - org.signal.Signal
+          - com.jetbrains.IntelliJ-IDEA-Ultimate
+          - com.jetbrains.DataGrip
+          - app.ytmdesktop.ytmdesktop
+          - us.zoom.Zoom
+          - org.gnome.Extensions
+        state: present
+        remote: flathub
+
+    - name: Set git pull strategy
+      command: git config --global pull.rebase true
+      become: yes
+      become_user: michael
+      
+    - name: Set git default branch
+      command: git config --global init.defaultBranch main
+      become: yes
+      become_user: michael
+
+    - name: Set git name
+      command: git config --global user.name "Michael Della Bitta"
+      become: yes
+      become_user: michael
+
+    - name: Set git email
+      command: git config --global user.email "mdellabitta@tutanota.com"
+      become: yes
+      become_user: michael
+          
+    - name: Install pip packages
+      pip:
+        name:
+          - s3cmd
+        state: latest
+
+    - name: Add user to docker group
+      user:
+        name: michael
+        groups: docker
+        append: yes
+
+    - name: Change user shell to zsh 
+      become: yes
+      user:
+        name: "michael"
+        shell: /bin/zsh
+
+    - name: Check if oh-my-zsh is installed
+      stat: 
+        path: /home/michael/.oh-my-zsh
+      register: oh_my_zsh_installed
+
+    - name: Download oh-my-zsh
+      command: "curl -o /tmp/oh-my-zsh.sh -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+      when: oh_my_zsh_installed.stat.exists == False
+
+    - name: Install oh-my-zsh
+      command: "sh /tmp/oh-my-zsh.sh --unattended --keep-zshrc"
+      become: yes
+      become_user: michael
+      args:
+        creates: /home/michael/.oh-my-zsh
+
+    - name: Load pyenv in .zshrc
+      lineinfile:
+        path: /home/michael/.zshrc
+        regexp: 'pyenv init'
+        line: export PYENV_ROOT="$HOME/.pyenv"; export PATH="$PYENV_ROOT/bin:$PATH"; eval "$(pyenv init --path)"
+        insertafter: EOF
+
+    - name: Download Powerlevel10k
+      command: "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /home/michael/.oh-my-zsh/custom/themes/powerlevel10k"
+      become: yes
+      become_user: michael
+      args:
+        creates: /home/michael/.oh-my-zsh/custom/themes/powerlevel10k
+
+    - name: Install Powerlevel10k theme
+      ansible.builtin.lineinfile:
+        path: /home/michael/.zshrc
+        regexp: '^ZSH_THEME='
+        line: ZSH_THEME="powerlevel10k/powerlevel10k"
+
+    - name: Check if SDKMAN is installed
+      stat: 
+        path: /home/michael/.sdkman
+      register: sdkman_installed
+
+    - name: Download SDKMAN
+      command: "curl -o /tmp/sdkman.sh -s 'https://get.sdkman.io?rcupdate=false'"
+      when: sdkman_installed.stat.exists == False
+
+    - name: Install SDKMAN
+      command: "sh /tmp/sdkman.sh"
+      become: yes
+      become_user: michael
+      args:
+        creates: /home/michael/.sdkman
+      when: sdkman_installed.stat.exists == False
+
+    - name: Add SDKMAN to .zshrc
+      lineinfile:
+        path: /home/michael/.zshrc
+        line: export SDKMAN_DIR="$HOME/.sdkman"; [[ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" ]] && source "${SDKMAN_DIR}/bin/sdkman-init.sh"
+        insertafter: EOF
+        regexp: "sdkman-init"
+      when: sdkman_installed.stat.exists == False
+
+    - name: Check if nvm is installed
+      stat: 
+        path: /home/michael/.nvm
+      register: nvm_installed
+
+    - name: Download nvm
+      command: curl -o /tmp/nvm.sh -s 'https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh'
+      when: nvm_installed.stat.exists == False
+
+    - name: Run nvm install script
+      command: "sh /tmp/nvm.sh"
+      become: yes
+      become_user: michael
+      args:
+        creates: /home/michael/.nvm
+      when: nvm_installed.stat.exists == False
+
+    - name: Add nvm to .zshrc
+      lineinfile:
+        path: /home/michael/.zshrc
+        line: export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+        insertafter: EOF
+        regexp: "nvm.sh"
+      when: nvm_installed.stat.exists == False
+      
+    - name: Check if aws-cli is installed
+      stat: 
+        path: /usr/local/bin/aws
+      register: aws_cli_installed
+    
+    - name: Download aws cli
+      command: 'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"'
+      when: aws_cli_installed.stat.exists == False
+
+    - name: Unzip aws cli
+      command: unzip -u /tmp/awscliv2.zip -d /tmp
+      when: aws_cli_installed.stat.exists == False
+
+    - name: Install aws cli
+      command: /tmp/aws/install --update
+      become: yes
+      when: aws_cli_installed.stat.exists == False
+      
+    - name: ensure fonts directory
+      file:
+        path: /home/michael/.fonts
+        state: directory
+
+    - name: FiraCode exists
+      shell: "ls /home/michael/.fonts/Fira*Nerd*Font*Complete*"
+      register: firacode_exists
+      ignore_errors: yes
+
+    - name: Download FiraCode
+      when: firacode_exists is failed
+      ansible.builtin.unarchive:
+        src: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/FiraCode.zip
+        dest: /home/michael/.fonts/
+        remote_src: yes
+
+  handlers:
