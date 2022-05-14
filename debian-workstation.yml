@@ -6,16 +6,6 @@
 
   tasks:
 
-    - name: Add Ungoogled Chromium key
-      ansible.builtin.shell:
-        cmd: "curl -sS https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key | sudo gpg --dearmor | sudo tee /usr/share/keyrings/ungoogled-chromium-keyring.gpg"
-      args:
-        creates: /usr/share/keyrings/ungoogled-chromium-keyring.gpg
-
-    - name: Add Ungoogled Chromium repo
-      ansible.builtin.apt_repository:
-        filename: ungoogled-chromium
-        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/ungoogled-chromium-keyring.gpg] http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /"
 
     - name: Add 1password key
       ansible.builtin.shell:
@@ -102,7 +92,6 @@
     - name: Install packages
       apt:
         pkg:
-          - ungoogled-chromium
           - ca-certificates
           - curl
           - gnupg
