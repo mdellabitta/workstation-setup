@@ -31,13 +31,23 @@ sudo dnf install -y \
 
 if ! [[ -d $HOME/.pyenv ]]
 then
-	echo '---> Installing pyenv'
-	curl https://pyenv.run | bash
-
-	PYENV_ROOT="$HOME/.pyenv"
-	PATH="$PYENV_ROOT/bin:$PATH"; 
-	eval "$(pyenv init --path)"
+        echo '---> Downloading and building pyenv'
+	git clone https://github.com/pyenv/pyenv.git $HOME/.pyenv
+        cd $HOME/.pyenv && src/configure && make -C src; cd -
 fi
+
+if ! grep -q pyenv $HOME/.bashrc
+then
+    echo '---> Installing pyenv into .bashrc'
+    echo 'export PYENV_ROOT="$HOME/.pyenv"' > $HOME/bashrc.tmp
+    echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/bashrc.tmp
+    echo 'eval "$(pyenv init --path)"' >> $HOME/bashrc.tmp
+    cat $HOME/.bashrc >> $HOME/bashrc.tmp
+    mv $HOME/.bashrc $HOME/.bashrc.bak.$(timestamp=$(date +%s))
+    mv $HOME/bashrc.tmp $HOME/.bashrc
+fi
+
+source ~/.bashrc
 
 echo '---> Installing python 3.10.4 and setting it as default'
 pyenv install -s 3.10.4
