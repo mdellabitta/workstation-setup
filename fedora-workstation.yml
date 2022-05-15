@@ -17,7 +17,7 @@
       rpm_key:
         key: https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-fedora-2020
         fingerprint: E9A4 91A3 DE24 7814 E7E0 67EA E06F 8ECD D651 FF2E
-    
+
     - name: Add RPM Fusion nonfree key
       rpm_key:
         key: https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-nonfree-fedora-2020
@@ -25,10 +25,10 @@
 
     - name: Enable RPM Fusion
       dnf:
-        name: 
+        name:
           - "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
           - "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
-  
+
     - name: Add vscodium repo
       yum_repository:
         name: vscodium
@@ -39,7 +39,7 @@
         repo_gpgcheck: yes
         gpgkey: https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg
         metadata_expire: 3600
-        
+
     - name: Add Docker repo
       get_url:
         url: https://download.docker.com/linux/fedora/docker-ce.repo
@@ -55,7 +55,7 @@
         owner: root
         group: root
         mode: 0644
-    
+
     - name: Install packages
       dnf:
         name:
@@ -95,7 +95,7 @@
 
     - name: Install flathub flatpaks
       community.general.flatpak:
-        name: 
+        name:
           - io.gitlab.librewolf-community
           - com.slack.Slack
           - com.todoist.Todoist
@@ -107,12 +107,13 @@
           - org.gnome.Extensions
         state: present
         remote: flathub
+        method: user
 
     - name: Set git pull strategy
       command: git config --global pull.rebase true
       become: yes
       become_user: michael
-      
+
     - name: Set git default branch
       command: git config --global init.defaultBranch main
       become: yes
@@ -127,7 +128,7 @@
       command: git config --global user.email "mdellabitta@tutanota.com"
       become: yes
       become_user: michael
-          
+
     - name: Install pip packages
       pip:
         name:
@@ -140,14 +141,14 @@
         groups: docker
         append: yes
 
-    - name: Change user shell to zsh 
+    - name: Change user shell to zsh
       become: yes
       user:
         name: "michael"
         shell: /bin/zsh
 
     - name: Check if oh-my-zsh is installed
-      stat: 
+      stat:
         path: /home/michael/.oh-my-zsh
       register: oh_my_zsh_installed
 
@@ -183,7 +184,7 @@
         line: ZSH_THEME="powerlevel10k/powerlevel10k"
 
     - name: Check if SDKMAN is installed
-      stat: 
+      stat:
         path: /home/michael/.sdkman
       register: sdkman_installed
 
@@ -208,7 +209,7 @@
       when: sdkman_installed.stat.exists == False
 
     - name: Check if nvm is installed
-      stat: 
+      stat:
         path: /home/michael/.nvm
       register: nvm_installed
 
@@ -231,12 +232,12 @@
         insertafter: EOF
         regexp: "nvm.sh"
       when: nvm_installed.stat.exists == False
-      
+
     - name: Check if aws-cli is installed
-      stat: 
+      stat:
         path: /usr/local/bin/aws
       register: aws_cli_installed
-    
+
     - name: Download aws cli
       command: 'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"'
       when: aws_cli_installed.stat.exists == False
@@ -249,7 +250,7 @@
       command: /tmp/aws/install --update
       become: yes
       when: aws_cli_installed.stat.exists == False
-      
+
     - name: ensure fonts directory
       file:
         path: /home/michael/.fonts
