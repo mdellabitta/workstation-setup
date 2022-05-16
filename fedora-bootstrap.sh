@@ -45,9 +45,11 @@ then
     cat $HOME/.bashrc >> $HOME/bashrc.tmp
     mv $HOME/.bashrc $HOME/.bashrc.bak.$(timestamp=$(date +%s))
     mv $HOME/bashrc.tmp $HOME/.bashrc
-fi
 
-source ~/.bashrc
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init --path)"	
+fi
 
 echo '---> Installing python 3.10.4 and setting it as default'
 pyenv install -s 3.10.4
