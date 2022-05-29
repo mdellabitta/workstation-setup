@@ -1,0 +1,9 @@
+collections:
+
+roles:
+  - gantsign.intellij
+  - gantsign.git_user
+  - gantsign.oh-my-zsh
+  - gantsign.pyenv
+  - gantsign.sdkman
+  - geerlingguy.docker
