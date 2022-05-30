@@ -116,7 +116,8 @@
         name: flathub
         state: present
         flatpakrepo_url: https://flathub.org/repo/flathub.flatpakrepo
-        method: user
+        method: system
+      ignore_errors: yes
 
     - name: Install flathub flatpaks
       community.general.flatpak:
@@ -130,7 +131,7 @@
           - org.gnome.Extensions
         state: present
         remote: flathub
-        method: user
+        method: system
 
     - name: Set git pull strategy
       command: git config --global pull.rebase true
