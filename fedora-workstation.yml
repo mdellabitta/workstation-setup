@@ -109,6 +109,7 @@
           - jq
           - gnome-tweak-tool
           - chrome-gnome-shell
+          - neofetch
         state: latest
 
     - name: Add flathub
@@ -129,6 +130,8 @@
           - app.ytmdesktop.ytmdesktop
           - us.zoom.Zoom
           - org.gnome.Extensions
+          - org.gtk.Gtk3theme.adw-gtk3
+          - org.gtk.Gtk3theme.adw-gtk3-dark
         state: present
         remote: flathub
         method: system
