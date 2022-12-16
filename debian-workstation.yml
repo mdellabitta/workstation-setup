@@ -118,6 +118,11 @@
           - jq
         state: latest
 
+    - name: Enforce git commit signing
+      command: git config --global commit.gpgsign true
+      become: yes
+      become_user: michael
+
     - name: Set git pull strategy
       command: git config --global pull.rebase true
       become: yes
