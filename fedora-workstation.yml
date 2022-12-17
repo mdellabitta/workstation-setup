@@ -86,6 +86,14 @@
         owner: root
         group: root
         mode: 0644
+    
+    - name: Add hashicorp repo
+      get_url:
+        url: https://rpm.releases.hashicorp.com/fedora/hashicorp.repo
+        dest: '/etc/yum.repos.d/hashicorp.repo'
+        owner: root
+        group: root
+        mode: 0644
 
     - name: Install packages
       dnf:
@@ -109,6 +117,8 @@
           - jq
           - gnome-tweak-tool
           - neofetch
+          - terraform
+          - terraform-ls
         state: latest
 
     - name: Add flathub
