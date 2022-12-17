@@ -108,7 +108,6 @@
           - ripgrep
           - jq
           - gnome-tweak-tool
-          - chrome-gnome-shell
           - neofetch
         state: latest
 
