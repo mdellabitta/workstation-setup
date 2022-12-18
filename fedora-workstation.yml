@@ -238,7 +238,7 @@
         state: directory
 
     - name: MesloLGS NF exists
-      shell: "ls /home/michael/.fonts/MesloLGS*NF"
+      shell: "ls /home/michael/.fonts/MesloLGS*NF*"
       register: meslolgs_exists
       ignore_errors: yes
 
