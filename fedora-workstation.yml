@@ -119,6 +119,7 @@
           - neofetch
           - terraform
           - terraform-ls
+          - pwgen
         state: latest
 
     - name: Add flathub
