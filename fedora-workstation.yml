@@ -120,6 +120,7 @@
           - terraform
           - terraform-ls
           - pwgen
+          - httpie
         state: latest
 
     - name: Add flathub
