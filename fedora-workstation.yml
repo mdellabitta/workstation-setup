@@ -121,6 +121,7 @@
           - terraform-ls
           - pwgen
           - httpie
+          - btop
         state: latest
 
     - name: Add flathub
@@ -143,6 +144,9 @@
           - org.gnome.Extensions
           - org.gtk.Gtk3theme.adw-gtk3
           - org.gtk.Gtk3theme.adw-gtk3-dark
+          - com.github.johnfactotum.Foliate
+          - com.github.Eloston.UngoogledChromium
+          - com.google.Chrome
         state: present
         remote: flathub
         method: system
