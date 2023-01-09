@@ -147,6 +147,7 @@
           - com.github.johnfactotum.Foliate
           - com.github.Eloston.UngoogledChromium
           - com.google.Chrome
+          - md.obsidian.Obsidian
         state: present
         remote: flathub
         method: system
