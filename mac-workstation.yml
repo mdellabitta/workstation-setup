@@ -53,11 +53,6 @@
           - tmux
         state: latest
 
-    - name: Enforce git commit signing
-      command: git config --global commit.gpgsign true
-      become: yes
-      become_user: michael
-
     - name: Set pinentry program
       command: git config --global gpg.program gpg
       become: yes
