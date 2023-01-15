@@ -22,15 +22,16 @@
           - signal
           - slack
           - todoist
-          - virtualbox
-          - visual-studio-code
-          - vivaldi
+          - vscodium
+          - eloston-chromium
+          - google-chrome
+          - librewolf
           - ytmdesktop-youtube-music
           - zoom
           - docker
-          - vagrant
           - font-fira-code-nerd-font
-          - sizeup
+          - font-meslo-lg-nerd-font
+          - rectangle
         state: latest
       
     - name: Install packages
@@ -49,7 +50,7 @@
           - jq
           - ncdu
           - ansible
-	  - tmux
+          - tmux
         state: latest
 
     - name: Enforce git commit signing
