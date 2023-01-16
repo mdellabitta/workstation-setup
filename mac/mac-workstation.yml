@@ -32,6 +32,9 @@
           - font-fira-code-nerd-font
           - font-meslo-lg-nerd-font
           - rectangle
+          - syncthing
+          - obsidian
+          - tailscale
         state: latest
       
     - name: Install packages
@@ -39,7 +42,6 @@
         pkg:
           - git
           - pyenv
-          - tailscale
           - curl
           - gnupg 
           - pinentry-mac
