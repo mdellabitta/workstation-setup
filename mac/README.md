@@ -4,7 +4,8 @@
 2. `brew install pyenv`
 3. Add pyenv to .zshrc:
 
-```echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
+```
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
 echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
 echo 'eval "$(pyenv init -)"' >> ~/.zshrc
 ```
