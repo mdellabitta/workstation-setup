@@ -6,7 +6,8 @@
 
 ```echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
 echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
-echo 'eval "$(pyenv init -)"' >> ~/.zshrc```
+echo 'eval "$(pyenv init -)"' >> ~/.zshrc
+```
 
 4. Reload terminal and run `pyenv install 3.11.1` (or whatever later version)
 5. `pyenv global 3.11.1`
