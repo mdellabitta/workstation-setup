@@ -11,11 +11,8 @@
         pkg:
           - 1password
           - bitwarden
-          - datagrip
           - firefox
           - gimp
-          - intellij-idea
-          - ipfs
           - iterm2
           - malwarebytes
           - omnidisksweeper
@@ -35,6 +32,8 @@
           - syncthing
           - obsidian
           - tailscale
+          - raycast
+          - jetbrains-toolbox
         state: latest
       
     - name: Install packages
