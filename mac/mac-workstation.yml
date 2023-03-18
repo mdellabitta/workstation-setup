@@ -52,6 +52,7 @@
           - ncdu
           - ansible
           - tmux
+          - coreutils
         state: latest
 
     - name: Set pinentry program
@@ -78,14 +79,12 @@
       command: git config --global user.email "mdellabitta@tutanota.com"
       become: yes
       become_user: michael
-          
-    - name: Install pip packages
-      pip:
-        name:
-          - docker-compose
-          - s3cmd
-        state: latest
 
+    - name: Get asdf
+      command: git clone https://github.com/asdf-vm/asdf.git ~/.asdf
+      become: yes
+      become_user: michael
+          
     - name: Check if oh-my-zsh is installed
       stat: 
         path: /Users/michael/.oh-my-zsh
@@ -129,6 +128,7 @@
             nvm
             zsh-autosuggestions
             zsh-syntax-highlighting
+            asdf
           )
           source $ZSH/oh-my-zsh.sh
 
@@ -169,43 +169,5 @@
         insertafter: EOF
         regexp: "sdkman-init"
       when: sdkman_installed.stat.exists == False
-
-    - name: Check if nvm is installed
-      stat: 
-        path: /Users/michael/.nvm
-      register: nvm_installed
-
-    - name: Download nvm
-      command: curl -o /tmp/nvm.sh -s 'https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh'
-      when: nvm_installed.stat.exists == False
-
-    - name: Run nvm install script
-      command: "sh /tmp/nvm.sh"
-      become: yes
-      become_user: michael
-      args:
-        creates: /Users/michael/.nvm
-      when: nvm_installed.stat.exists == False
-
-    - name: Add nvm to .zshrc
-      lineinfile:
-        path: /Users/michael/.zshrc
-        line: export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-        insertafter: EOF
-        regexp: "nvm.sh"
-      when: nvm_installed.stat.exists 
-      
-    - name: Add pyenv to .zshrc
-      ansible.builtin.lineinfile:
-        path: /Users/michael/.zshrc
-        line: eval "$(pyenv init -)"
-        insertafter: EOF
-        regexp: "pyenv init"
-
-    - name: Add pyenv to .zprofile
-      ansible.builtin.lineinfile:
-        create: true
-        path: /Users/michael/.zprofile
-        line: eval "$(pyenv init --path)"
 
   handlers:
