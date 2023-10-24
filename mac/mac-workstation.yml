@@ -27,14 +27,16 @@
           - rectangle
           - tailscale
           - raycast
+          - keybase
           - jetbrains-toolbox
         state: latest
       
     - name: Install packages
       community.general.homebrew:
         pkg:
+          - tonarino/innernet/innernet
           - git
-	  - magic-wormhole
+          - magic-wormhole
           - pyenv
           - curl
           - gnupg 
@@ -71,11 +73,6 @@
 
     - name: Set git email
       command: git config --global user.email "mdellabitta@tutanota.com"
-      become: yes
-      become_user: mdellabitta
-
-    - name: Get asdf
-      command: git clone https://github.com/asdf-vm/asdf.git ~/.asdf
       become: yes
       become_user: mdellabitta
           
@@ -122,7 +119,7 @@
             nvm
             zsh-autosuggestions
             zsh-syntax-highlighting
-            asdf
+            pyenv
           )
           source $ZSH/oh-my-zsh.sh
 
