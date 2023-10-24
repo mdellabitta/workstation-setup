@@ -34,6 +34,7 @@
       community.general.homebrew:
         pkg:
           - git
+	  - magic-wormhole
           - pyenv
           - curl
           - gnupg 
