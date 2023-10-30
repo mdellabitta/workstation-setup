@@ -36,6 +36,7 @@
         pkg:
           - tonarino/innernet/innernet
           - git
+          - git-lfs
           - magic-wormhole
           - pyenv
           - curl
@@ -53,32 +54,25 @@
 
     - name: Set pinentry program
       command: git config --global gpg.program gpg
-      become: yes
-      become_user: mdellabitta
 
     - name: Set git pull strategy
       command: git config --global pull.rebase true
-      become: yes
-      become_user: mdellabitta
       
     - name: Set git default branch
       command: git config --global init.defaultBranch main
-      become: yes
-      become_user: mdellabitta
 
     - name: Set git name
       command: git config --global user.name "Michael Della Bitta"
-      become: yes
-      become_user: mdellabitta
 
     - name: Set git email
       command: git config --global user.email "mdellabitta@tutanota.com"
-      become: yes
-      become_user: mdellabitta
+    
+    - name: Set up git lfs
+      command: git lfs install
           
     - name: Check if oh-my-zsh is installed
       stat: 
-        path: /Users/mdellabitta/.oh-my-zsh
+        path: ~/.oh-my-zsh
       register: oh_my_zsh_installed
 
     - name: Download oh-my-zsh
@@ -87,31 +81,25 @@
 
     - name: Install oh-my-zsh
       command: "sh /tmp/oh-my-zsh.sh --unattended --keep-zshrc"
-      become: yes
-      become_user: mdellabitta
       args:
-        creates: /Users/mdellabitta/.oh-my-zsh
+        creates: ~/.oh-my-zsh
 
     - name: Install zsh-autosuggestions
-      command: git clone https://github.com/zsh-users/zsh-autosuggestions /Users/mdellabitta/.oh-my-zsh/custom/plugins/zsh-autosuggestions
-      become: yes
-      become_user: mdellabitta
+      command: git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
       args:
-        creates: /Users/mdellabitta/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+        creates: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 
     - name: Install zsh-syntax-highlighting
-      command: git clone https://github.com/zsh-users/zsh-syntax-highlighting /Users/mdellabitta/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
-      become: yes
-      become_user: mdellabitta
+      command: git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
       args:
-        creates: /Users/mdellabitta/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+        creates: ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 
     - name: Edit omz into .zshrc
       ansible.builtin.blockinfile:
-        path: /Users/mdellabitta/.zshrc
+        path: ~/.zshrc
         create: true
         block: |
-          export ZSH="/Users/mdellabitta/.oh-my-zsh"
+          export ZSH="~/.oh-my-zsh"
           plugins=(
             git
             node
@@ -124,21 +112,19 @@
           source $ZSH/oh-my-zsh.sh
 
     - name: Download Powerlevel10k
-      command: "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /Users/mdellabitta/.oh-my-zsh/custom/themes/powerlevel10k"
-      become: yes
-      become_user: mdellabitta
+      command: "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.oh-my-zsh/custom/themes/powerlevel10k"
       args:
-        creates: /Users/mdellabitta/.oh-my-zsh/custom/themes/powerlevel10k
+        creates: ~/.oh-my-zsh/custom/themes/powerlevel10k
 
     - name: Install Powerlevel10k theme
       ansible.builtin.lineinfile:
-        path: /Users/mdellabitta/.zshrc
+        path: ~/.zshrc
         regexp: '^ZSH_THEME='
         line: ZSH_THEME="powerlevel10k/powerlevel10k"
 
     - name: Check if SDKMAN is installed
       stat: 
-        path: /Users/mdellabitta/.sdkman
+        path: ~/.sdkman
       register: sdkman_installed
 
     - name: Download SDKMAN
@@ -147,15 +133,13 @@
 
     - name: Install SDKMAN
       command: "sh /tmp/sdkman.sh"
-      become: yes
-      become_user: mdellabitta
       args:
-        creates: /Users/mdellabitta/.sdkman
+        creates: ~/.sdkman
       when: sdkman_installed.stat.exists == False
 
     - name: Add SDKMAN to .zshrc
       lineinfile:
-        path: /Users/mdellabitta/.zshrc
+        path: ~/.zshrc
         line: export SDKMAN_DIR="$HOME/.sdkman"; [[ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" ]] && source "${SDKMAN_DIR}/bin/sdkman-init.sh"
         insertafter: EOF
         regexp: "sdkman-init"
