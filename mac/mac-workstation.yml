@@ -1,4 +1,4 @@
----
+
 - hosts: localhost
   tasks:
 
@@ -9,6 +9,7 @@
     - name: Install casks
       community.general.homebrew_cask:
         pkg:
+          - joplin
           - 1password
           - bitwarden
           - firefox
